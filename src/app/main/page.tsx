@@ -8,8 +8,8 @@ import { AuctionFilter as AuctionFilterType, SortOption, StatusOption } from '@/
 
 // 필터 옵션
 const FILTER_OPTIONS: AuctionFilterType[] = [
-  { type: 'LATEST', label: '최신순' },
-  { type: 'ENDING_SOON', label: '마감임박순' },
+  { type: 'LATEST', label: '최신 상품' },
+  { type: 'ENDING_SOON', label: '마감 임박 상품' },
 ];
 
 // 정렬 옵션
@@ -28,7 +28,7 @@ export default function MainPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>('');
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4">
       <AuctionHeader />
       
       <div className="mt-8">
@@ -45,7 +45,7 @@ export default function MainPage() {
         />
       </div>
       
-      <div className="mt-8">
+      <div className="mt-4">
         <AuctionList filterType={activeFilter} />
       </div>
     </div>

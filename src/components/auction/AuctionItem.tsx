@@ -15,8 +15,8 @@ const AuctionItem: React.FC<AuctionItemProps> = ({ item }) => {
 
   return (
     <Link href={`/auction/${item.id}`} className="block">
-      <div className="group">
-        <div className="relative aspect-square overflow-hidden bg-gray-100 mb-3">
+      <div className="group rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 p-3 bg-white">
+        <div className="relative aspect-square overflow-hidden bg-gray-100 mb-3 rounded-lg">
           <Image
             src="/images/item.jpg"
             alt={item.title}

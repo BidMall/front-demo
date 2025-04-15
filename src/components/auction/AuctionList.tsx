@@ -24,7 +24,7 @@ const SAMPLE_ITEMS: AuctionItemType[] = [
     title: 'HEADING(제목영역)',
     currentDate: 'YY.MM.DD',
     startPrice: 100000,
-    currentPrice: 100000,
+    currentPrice: 150000,
     status: 'ACTIVE',
     imageUrl: '/images/item.jpg'
   },
@@ -33,7 +33,7 @@ const SAMPLE_ITEMS: AuctionItemType[] = [
     title: 'HEADING(제목영역)',
     currentDate: 'YY.MM.DD',
     startPrice: 100000,
-    currentPrice: 100000,
+    currentPrice: 120000,
     status: 'ACTIVE',
     imageUrl: '/images/item.jpg'
   },
@@ -42,7 +42,7 @@ const SAMPLE_ITEMS: AuctionItemType[] = [
     title: 'HEADING(제목영역)',
     currentDate: 'YY.MM.DD',
     startPrice: 100000,
-    currentPrice: 100000,
+    currentPrice: 110000,
     status: 'ACTIVE',
     imageUrl: '/images/item.jpg'
   },
@@ -51,7 +51,7 @@ const SAMPLE_ITEMS: AuctionItemType[] = [
     title: 'HEADING(제목영역)',
     currentDate: 'YY.MM.DD',
     startPrice: 100000,
-    currentPrice: 100000,
+    currentPrice: 130000,
     status: 'ACTIVE',
     imageUrl: '/images/item.jpg'
   },
@@ -60,7 +60,61 @@ const SAMPLE_ITEMS: AuctionItemType[] = [
     title: 'HEADING(제목영역)',
     currentDate: 'YY.MM.DD',
     startPrice: 100000,
-    currentPrice: 100000,
+    currentPrice: 140000,
+    status: 'ACTIVE',
+    imageUrl: '/images/item.jpg'
+  },
+  {
+    id: 7,
+    title: 'HEADING(제목영역)',
+    currentDate: 'YY.MM.DD',
+    startPrice: 200000,
+    currentPrice: 250000,
+    status: 'ACTIVE',
+    imageUrl: '/images/item.jpg'
+  },
+  {
+    id: 8,
+    title: 'HEADING(제목영역)',
+    currentDate: 'YY.MM.DD',
+    startPrice: 150000,
+    currentPrice: 180000,
+    status: 'ACTIVE',
+    imageUrl: '/images/item.jpg'
+  },
+  {
+    id: 9,
+    title: 'HEADING(제목영역)',
+    currentDate: 'YY.MM.DD',
+    startPrice: 120000,
+    currentPrice: 145000,
+    status: 'ACTIVE',
+    imageUrl: '/images/item.jpg'
+  },
+  {
+    id: 10,
+    title: 'HEADING(제목영역)',
+    currentDate: 'YY.MM.DD',
+    startPrice: 90000,
+    currentPrice: 115000,
+    status: 'ACTIVE',
+    imageUrl: '/images/item.jpg'
+  },
+  {
+    id: 11,
+    title: 'HEADING(제목영역)',
+    currentDate: 'YY.MM.DD',
+    startPrice: 85000,
+    currentPrice: 105000,
+    status: 'ACTIVE',
+    imageUrl: '/images/item.jpg'
+  },
+  {
+    id: 12,
+    title: 'HEADING(제목영역)',
+    currentDate: 'YY.MM.DD',
+    startPrice: 95000,
+    currentPrice: 125000,
     status: 'ACTIVE',
     imageUrl: '/images/item.jpg'
   }
@@ -98,7 +152,7 @@ const AuctionList: React.FC<AuctionListProps> = ({ filterType }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-14">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-14">
       {items.map(item => (
         <AuctionItem key={item.id} item={item} />
       ))}
