@@ -1,26 +1,19 @@
-// CDN 방식으로 사용
+import PortOne from "@portone/browser-sdk/v2";
 
-// 전역 타입 정의
-declare global {
-  interface Window {
-    PortOne: any;
-  }
-}
-
-export type PaymentData = {
+// 결제를 실행하는 함수
+export const requestPayment = async ({
+  orderName,
+  amount,
+  currency = 'KRW',
+  itemId,
+  customData = {}
+}: {
   orderName: string;
   amount: number;
   currency?: string;
   itemId: string | number;
-  bidId?: string | number;
-};
-
-/**
- * PortOne 결제 요청 함수
- */
-export const requestPayment = async (paymentData: PaymentData) => {
-  const { orderName, amount, currency = 'KRW', itemId, bidId } = paymentData;
-
+  customData?: Record<string, any>;
+}) => {
   // 환경 변수 확인
   const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
   const channelKey = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY;
@@ -29,29 +22,35 @@ export const requestPayment = async (paymentData: PaymentData) => {
     throw new Error('PortOne 설정이 올바르지 않습니다. 환경 변수를 확인해주세요.');
   }
 
-  // PortOne SDK가 로드되었는지 확인
-  if (typeof window === 'undefined' || !window.PortOne) {
-    console.error('PortOne SDK가 로드되지 않았습니다.');
-    throw new Error('PortOne SDK가 로드되지 않았습니다.');
-  }
-
-  // 결제 고유 ID 생성 (실제 서비스에서는 서버에서 생성한 ID를 사용해야 함)
+  // 결제 고유 ID 생성
   const paymentId = `order-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
   try {
-    const payment = await window.PortOne.requestPayment({
-      storeId,            // 상점 ID
-      channelKey,         // 채널 키
-      paymentId,          // 결제 ID (고유값)
-      orderName,          // 주문명
-      totalAmount: amount, // 결제 금액
-      currency,           // 통화 (KRW 등)
-      payMethod: "CARD",  // 결제 수단
-      customData: {       // 커스텀 데이터
-        itemId,            // 상품 ID
-        bidId              // 입찰 ID
+    // 통화 형식 변환
+    const formattedCurrency = currency === 'KRW' ? 'CURRENCY_KRW' : 'CURRENCY_USD';
+    
+    // PortOne SDK를 직접 호출 (타입 에러 방지를 위해 any 타입 사용)
+    const payment = await (PortOne as any).requestPayment({
+      storeId,
+      channelKey,
+      paymentId,
+      orderName,
+      totalAmount: amount,
+      currency: formattedCurrency,
+      payMethod: "CARD",
+      customData: {
+        itemId,
+        ...customData
       },
     });
+
+    // 결제 실패 또는 오류 처리
+    if (payment && payment.code != null) {
+      return {
+        success: false,
+        error: payment.message || '알 수 없는 오류가 발생했습니다.'
+      };
+    }
 
     return {
       success: true,
