@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AuctionDetail } from '@/types/auction';
 import AuctionHeader from '@/components/auction/AuctionHeader';
+import { requestPayment } from '@/utils/portone';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -88,6 +89,7 @@ export default function AuctionDetailClient({ id }: AuctionDetailClientProps) {
   const [bidAmount, setBidAmount] = useState('');
   const [bidMessage, setBidMessage] = useState('');
   const [priceHistoryData, setPriceHistoryData] = useState(generatePriceHistoryData());
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     // 실제 구현에서는 API 호출로 대체
@@ -125,28 +127,53 @@ export default function AuctionDetailClient({ id }: AuctionDetailClientProps) {
     setShowBidModal(false);
   };
 
-  const handleBidSubmit = () => {
+  const handleBidSubmit = async () => {
     // 입찰 금액 검증
     if (!bidAmount || parseInt(bidAmount) <= (detail?.currentPrice || 0)) {
       setBidMessage('현재가보다 높은 금액을 입력해주세요.');
       return;
     }
 
-    // 실제 구현에서는 API 호출로 입찰 처리
-    alert(`${bidAmount}원 입찰이 완료되었습니다.`);
-    setShowBidModal(false);
+    setIsProcessing(true);
+    setBidMessage('');
 
-    // 입찰 성공 후 데이터 갱신 (실제 API 호출 대신 로컬에서 업데이트)
-    if (detail) {
-      const newDetail = {
-        ...detail,
-        currentPrice: parseInt(bidAmount),
-        bidCount: detail.bidCount + 1
-      };
-      setDetail(newDetail);
-      
-      // 그래프 데이터 업데이트
-      updatePriceHistoryGraph(parseInt(bidAmount));
+    try {
+      // PortOne 결제 요청
+      const result = await requestPayment({
+        orderName: `${detail?.title} 경매 입찰`,
+        amount: parseInt(bidAmount),
+        currency: 'KRW',
+        itemId: detail?.id || 0,
+        bidId: `bid-${Date.now()}` // 실제 서비스에서는 서버에서 생성한 ID를 사용해야 함
+      });
+
+      if (result.success) {
+        // 결제 성공
+        alert(`${bidAmount}원 입찰이 완료되었습니다.`);
+        setShowBidModal(false);
+
+        // 입찰 성공 후 데이터 갱신 (실제 API 호출 대신 로컬에서 업데이트)
+        if (detail) {
+          const newDetail = {
+            ...detail,
+            currentPrice: parseInt(bidAmount),
+            bidCount: detail.bidCount + 1
+          };
+          setDetail(newDetail);
+          
+          // 그래프 데이터 업데이트
+          updatePriceHistoryGraph(parseInt(bidAmount));
+        }
+      } else {
+        // 결제 실패
+        setBidMessage('결제 처리 중 오류가 발생했습니다. 다시 시도해 주세요.');
+        console.error('결제 실패:', result.error);
+      }
+    } catch (error) {
+      console.error('결제 요청 중 오류 발생:', error);
+      setBidMessage('결제 요청 중 오류가 발생했습니다.');
+    } finally {
+      setIsProcessing(false);
     }
   };
   
@@ -321,9 +348,9 @@ export default function AuctionDetailClient({ id }: AuctionDetailClientProps) {
                 </button>
                 <button 
                   onClick={handleBid}
-                  className="flex-1 bg-gray-700 text-white py-3 px-6 rounded-md hover:bg-gray-800 transition-colors"
+                  className="flex-1 bg-[#e67850] text-white py-3 px-6 rounded-md hover:bg-[#d86640] transition-colors flex items-center justify-center"
                 >
-                  응찰하기
+                  <span>응찰하기 - 입찰하기</span>
                 </button>
               </div>
             </div>
@@ -369,6 +396,7 @@ export default function AuctionDetailClient({ id }: AuctionDetailClientProps) {
                     className="w-full p-3 border border-gray-300 rounded"
                     placeholder="입력하세요"
                     min={detail.currentPrice + 1}
+                    disabled={isProcessing}
                   />
                   {bidMessage && (
                     <p className="text-red-500 text-sm mt-1">{bidMessage}</p>
@@ -380,14 +408,24 @@ export default function AuctionDetailClient({ id }: AuctionDetailClientProps) {
                 <button
                   onClick={handleCloseBidModal}
                   className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
+                  disabled={isProcessing}
                 >
                   취소
                 </button>
                 <button
                   onClick={handleBidSubmit}
-                  className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-800"
+                  className={`px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-800 flex items-center justify-center ${isProcessing ? 'opacity-75 cursor-not-allowed' : ''}`}
+                  disabled={isProcessing}
                 >
-                  입찰하기
+                  {isProcessing ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      처리중...
+                    </>
+                  ) : '입찰하기'}
                 </button>
               </div>
             </div>
